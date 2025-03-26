@@ -3,6 +3,16 @@ $input v_color0, v_color1, v_fog, v_refl, v_texcoord0, v_lightmapUV, v_extra
 #include <bgfx_shader.sh>
 #include <newb/main.sh>
 
+vec4 worldTimeDetection(vec3 v_FogColor, vec3 v_FogControl) {
+  // dynamic time
+  float day = pow(max(min(1.0 - v_FogColor.r * 1.2, 1.0), 0.0), 0.4);
+  float night = pow(max(min(1.0 - v_FogColor.r * 1.5, 1.0), 0.0), 1.2);
+  float dusk = max(v_FogColor.r - v_FogColor.b, 0.0);
+  float rain = mix(smoothstep(0.66, 0.3, v_FogControl.x), 0.0, step(v_FogControl.x, 0.0));
+
+  return vec4(dusk, day, night, rain);
+}
+
 SAMPLER2D_AUTOREG(s_MatTexture);
 SAMPLER2D_AUTOREG(s_SeasonsTexture);
 SAMPLER2D_AUTOREG(s_LightMapTexture);
@@ -29,6 +39,19 @@ void main() {
   vec3 glow = nlGlow(s_MatTexture, v_texcoord0, v_extra.a);
 
   diffuse.rgb *= diffuse.rgb;
+  
+   vec4 worldTime = worldTimeDetection(v_fog.rgb, v_extra.xyz);
+  vec4 diff2 = texture2D(s_MatTexture, v_texcoord0);
+  float dif2 = (diff2.r + diff2.g + diff2.b) / 3.0;
+  float hl = smoothstep(0.57, 1.0, dif2);
+
+  hl *= mix(1.0, 0.3, worldTime.z);
+  hl *= mix(1.0, 0.6, worldTime.x);
+
+  hl *= 1.0;
+
+  diffuse.rgb += 1.03 * hl;
+  diffuse.a += 0.53 * hl;
 
   vec3 lightTint = texture2D(s_LightMapTexture, v_lightmapUV).rgb;
   lightTint = mix(lightTint.bbb, lightTint*lightTint, 0.35 + 0.65*v_lightmapUV.y*v_lightmapUV.y*v_lightmapUV.y);
@@ -43,6 +66,12 @@ void main() {
   #else
     diffuse.a = 1.0;
   #endif
+  
+  vec2 uvl = v_lightmapUV;
+
+  float shadowmap = smoothstep(0.915, 0.890, uvl.y);
+  diffuse.rgb *= mix(vec3(1.0), vec3(0.3, 0.4, 0.425), shadowmap);
+  diffuse.rgb += diffuse.rgb * (vec3(1.5, 0.5, 0.0) * 1.15) * pow(uvl.x * 1.2, 6.0);
 
   diffuse.rgb *= color.rgb;
   diffuse.rgb += glow;

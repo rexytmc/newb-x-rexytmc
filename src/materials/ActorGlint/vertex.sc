@@ -29,7 +29,7 @@ void main() {
 
   vec3 worldPosition;
   #ifdef INSTANCING
-    mat4 model = mtxFromCols(i_data0, i_data1, i_data2, vec4(0.0, 0.0, 0.0, 1.0));
+    mat4 model = mtxFromCols(i_data0, i_data1, i_data2, vec4(1.0, 1.0, 1.0, 1.0));
     worldPosition = instMul(model, vec4(a_position, 1.0)).xyz;
   #else
     worldPosition = mul(World, vec4(a_position, 1.0)).xyz;
