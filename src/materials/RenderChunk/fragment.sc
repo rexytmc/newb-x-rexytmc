@@ -70,7 +70,7 @@ void main() {
   vec2 uvl = v_lightmapUV;
 
   float shadowmap = smoothstep(0.915, 0.890, uvl.y);
-  diffuse.rgb *= mix(vec3(1.0), vec3(0.3, 0.4, 0.425), shadowmap);
+  diffuse.rgb *= mix(float3(1.0, 1.0, 1.0), float3(0.3, 0.4, 0.425), shadowmap);
   diffuse.rgb += diffuse.rgb * (vec3(1.5, 0.5, 0.0) * 1.15) * pow(uvl.x * 1.2, 6.0);
 
   diffuse.rgb *= color.rgb;
