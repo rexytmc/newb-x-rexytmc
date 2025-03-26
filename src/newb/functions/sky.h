@@ -103,61 +103,29 @@ vec3 getSunBloom(float viewDirX, vec3 horizonEdgeCol, vec3 FOG_COLOR) {
 }
 
 
-vec3 renderEndSky(vec3 horizonCol, vec3 zenithCol, vec3 v, float t) {
-    vec3 sky = vec3(0.02, 0.01, 0.04);
+vec3 renderEndSky(vec3 horizonCol, vec3 zenithCol, vec3 viewDir, float t) {
+  t *= 0.1;
+  float a = atan2(viewDir.x, viewDir.z);
 
-    // Ajuste para elevar las púas y aplicar distorsión
-    v.y = smoothstep(-0.4, 1.0, abs(v.y));  // Ajuste para elevar más las púas
+  float n1 = 0.5 + 0.5*sin(3.0*a + t + 10.0*viewDir.x*viewDir.y);
+  float n2 = 0.5 + 0.5*sin(5.0*a + 0.5*t + 5.0*n1 + 0.1*sin(40.0*a -4.0*t));
 
-    // Suavizar el ángulo para eliminar la línea del medio
-    float a = atan2(v.x, v.z);
-    a = mod(a + 6.14159265, 10.28318531); // Convierte el rango de [-π, π] a [0, 2π] de forma continua
+  float waves = 0.7*n2*n1 + 0.3*n1;
 
-    // Configuración base para las púas
-    float puaAncho = 20.0; // Mayor densidad
-    float puaLargo = 0.4;  // Más largas
+  float grad = 0.5 + 0.5*viewDir.y;
+  float streaks = waves*(1.0 - grad*grad*grad);
+  streaks += (1.0-streaks)*smoothstep(1.0-waves, -1.0, viewDir.y);
 
-    // Primera capa de púas
-    float s1 = sin(a * puaAncho + t * 0.2); // Velocidad de Puas
-    s1 *= s1;
-    s1 *= puaLargo * sin(a * 30.0 - 0.4 * t);
-    float g1 = smoothstep(1.0 - s1, -4.2, v.y);
-    float f1 = (4.5 * g1 + 1.0 * smoothstep(1.0, -0.8, v.y));
+  float f = 0.3*streaks + 0.7*smoothstep(1.0, -0.5, viewDir.y);
+  float h = streaks*streaks;
+  float g = h*h;
+  g *= g;
 
-    // Segunda capa de púas
-    float s2 = sin(a * (puaAncho + 15.0) + t * 0.2);
-    s2 *= s2;
-    s2 *= (puaLargo * 1.2) * sin(a * 0.0 - 0.8 * t);
-    float g2 = smoothstep(1.0 - s2, -6.0, v.y);
-    float f2 = (2.0 * g2 + 0.8 * smoothstep(1.0, -0.4, v.y));
+  vec3 sky = mix(zenithCol, horizonCol, f*f);
+  sky += (0.1*streaks + 2.0*g*g*g + h*h*h)*vec3(2.0,0.5,0.0);
+  sky += 0.25*streaks*spectrum(sin(2.0*viewDir.x*viewDir.y+t));
 
-    // Tercera capa de púas (más difusas)
-    float s3 = sin(a * (puaAncho - 5.0) + t * 0.2);
-    s3 *= s3;
-    s3 *= (puaLargo * 0.6) * sin(a * 20.0 - 0.2 * t);
-    float g3 = smoothstep(1.08 - s3, -3.8, v.y);
-    float f3 = (18.5 * g3 + 0.5 * smoothstep(2.0, -0.4, v.y));
-
-    // Colores dinámicos
-    vec3 colorBase1 = vec3(0.1, 0.3, 0.8); // Púrpura intenso
-    vec3 colorBase2 = vec3(0.1, 0.4, 0.9); // Azul-violeta
-    vec3 colorBase3 = vec3(0.2, 0.4, 1.0); // Magenta-rosado
-
-    vec3 puaColor1 = mix(colorBase1, colorBase2, sin(t * 0.9) * 0.5 + 0.5);
-    vec3 puaColor2 = mix(colorBase2, colorBase3, cos(t * 0.4) * 0.5 + 0.5);
-    vec3 puaColor3 = mix(colorBase1, colorBase3, sin(t * 0.3) * 0.5 + 0.5);
-
-    // Gradiente de fond
-    vec3 upperGradientCol = mix(zenithCol, vec3(0.048, 0.02, 0.04), smoothstep(0.6, 1.0, v.y));
-    vec3 lowerGradientCol = mix(horizonCol, vec3(0.8, 0.2, 0.28), smoothstep(0.0, 0.5, v.y));
-
-    // Mezcla de gradientes y púas con los colores
-    sky += mix(upperGradientCol, lowerGradientCol, pow(f1, 2.0));  // Gradiente combinado
-    sky += puaColor1 * f1 * 0.2;  // Capa de púas 1
-    sky += puaColor2 * f2 * 0.2;  // Capa de púas 2
-    sky += puaColor3 * f3 * 0.08; // Capa de púas 3
-
-    return sky;
+  return sky;
 }
 
 vec3 nlRenderSky(nl_skycolor skycol, nl_environment env, vec3 viewDir, vec3 FOG_COLOR, float t) {

@@ -72,17 +72,10 @@ vec3 nlLighting(
     // sky ambient
     light += mix(skycol.horizon, skycol.zenith, 0.5+uv1.y-0.5*lit.y)*(lit.y*(3.0-2.0*uv1.y)*(1.3 + (4.0*nightFactor) - rainDim));
 
-    // Sombras dinámicas con aumento de luz
-float shadow = max(
-    step(0.6, uv1.y), 
-    (1.2 - NL_SHADOW_INTENSITY * 16.2 + 0.8 * NL_SHADOW_INTENSITY * nightFactor) * lit.y
-);
-
-// Aumentar el efecto de luz dependiendo de la intensidad de shade
-shadow *= (shade > 1.8) ? 1.2 : 1.0;
-
-// Agregar un valor base para aumentar la iluminación general
-shadow += 0.2;
+    // shadow cast by top light
+    float shadow = step(0.93, uv1.y);
+    shadow = max(shadow, (1.0 - NL_SHADOW_INTENSITY + (0.6*NL_SHADOW_INTENSITY*nightFactor))*lit.y);
+    shadow *= shade > 0.8 ? 1.0 : 0.8;
 
     // shadow cast by simple cloud
     #ifdef NL_CLOUD_SHADOW
@@ -100,15 +93,12 @@ shadow += 0.2;
     light += torchLight*(1.0-(max(shadow, 0.65*lit.y)*dayFactor*(1.0-0.3*env.rainFactor)));
   }
 
-// Oscurecer en grietas SOMBRA ALADO
-    float col_max = max(COLOR.r, max(COLOR.g, COLOR.b));
-    if (col_max < 0.7) {
-        light *= 0.5;
-    }
+  // darken at crevices
+  light *= COLOR.g > 0.35 ? 1.0 : 0.8;
 
   // brighten tree leaves
   if (isTree) {
-    light *= 2.25;
+    light *= 1.25;
   }
 
   return light;
@@ -175,30 +165,14 @@ vec4 nlEntityEdgeHighlightPreprocess(vec2 texcoord) {
 }
 
 vec3 nlLavaNoise(vec3 tiledCpos, float t) {
-    t *= NL_LAVA_NOISE_SPEED;
-
-    // Crear una variación en la textura de la lava
-    vec2 offset = vec2(
-        fastVoronoi2(tiledCpos.xz * 0.4 + t * 0.1, 1.3), 
-        fastVoronoi2(tiledCpos.xz * 0.6 - t * 0.12, 1.3)
-    ) * 0.5; // Más distorsión para evitar patrones repetitivos
-
-    // Múltiples capas de ruido Voronoi para detalles adicionales
-    float n = fastVoronoi2((tiledCpos.xz + offset) * 1.2 + t, 1.8);
-    n *= fastVoronoi2((tiledCpos.xz - offset) * 2.1 - t, 1.4);
-    n *= fastVoronoi2((tiledCpos.xz + offset * 2.5) * 4.2 + t, 1.1);
-    
-    n = 0.84 - n * n * n; // Ajuste de contraste
-    n = 1.52 - n * n;
-    
-    float n2 = n * n;
-    n2 *= n2;
-
-    // Aplicar una sombra en la parte superior
-    float shadow = smoothstep(0.3, 0.9, n2);
-    vec3 lavaColor = mix(vec3(0.05, 0.02, 0.01), vec3(n, n2, n2), shadow);
-
-    return lavaColor;
+  t *=  NL_LAVA_NOISE_SPEED;
+  float n = fastVoronoi2(1.12*tiledCpos.xz + t, 1.8);
+  n *= fastVoronoi2(4.48*tiledCpos.xz + t, 1.5);
+  n = 1.0 - n*n*n;
+  n = 1.0 - n*n;
+  float n2 = n*n;
+  n2 *= n2;
+  return vec3(n, n2, n2);
 }
 
 #endif

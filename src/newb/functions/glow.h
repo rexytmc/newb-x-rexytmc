@@ -10,7 +10,7 @@ vec3 glowDetect(vec4 diffuse) {
   if (diffuse.a > 0.988 && diffuse.a < 0.993) {
     vec3 glow = diffuse.rgb * diffuse.rgb;
     if (diffuse.a > 0.989) {
-      return 1.0 * glow;
+      return 0.4 * glow;
     }
     return glow;
   }

@@ -76,9 +76,9 @@
 #define NL_RAIN_HORIZON_COL  vec3(0.76,0.77,0.79)
 #define NL_END_ZENITH_COL    vec3(0.01, 0.01, 0.04)
 #define NL_END_HORIZON_COL   vec3(0.45, 0.14, 1)*2.8
-#define NL_DAWN_ZENITH_COL   vec3(1.0, 0.5, 0.0)  // Marrón-anaranjado más apagado
-#define NL_DAWN_HORIZON_COL  vec3(1.0, 0.5, 0.0)  // Naranja dorado más vibrante
-#define NL_DAWN_EDGE_COL     vec3(1.0, 0.5, 0.0)   // Amarillo cálido y suave
+#define NL_DAWN_ZENITH_COL   vec3(0.15, 0.2, 0.45) // Azul frío más tenue y suave
+#define NL_DAWN_HORIZON_COL  vec3(1.4, 0.7, 0.1)   // Naranja menos saturado
+#define NL_DAWN_EDGE_COL     vec3(1.0, 0.8, 0.3)   // Amarillo más cálido y difuminado
 
 /* Rainbow */
 //#define NL_RAINBOW         // [toggle] enable rainbow in sky
@@ -95,7 +95,7 @@
 #define NL_PLANTS_WAVE 0.05    // [toggle] 0.02 gentle ~ 0.4 violent
 #define NL_LANTERN_WAVE 0.16   // [toggle] 0.05 subtle ~ 0.4 large swing
 #define NL_WAVE_SPEED 2.8      // 0.5 slow wave ~ 5.0 very fast wave
-//#define NL_EXTRA_PLANTS_WAVE // [toggle] !dont use! wave using texture coords (1.21.0 vanilla 2048x1024)
+#define NL_EXTRA_PLANTS_WAVE // [toggle] !dont use! wave using texture coords (1.21.0 vanilla 2048x1024)
 
 /* Water */
 #define NL_WATER_TRANSPARENCY 0.86 // 0.0 transparent ~ 1.0 normal
@@ -181,12 +181,12 @@
 #define NL_SUNMOON_SIZE 1.0     // 0.3 tiny ~ 4.0 massive
 
 /* Fake godrays during sunrise/sunset */
-//#define NL_GODRAY 8.0 // [toggle] 0.1 subtle ~ 0.8 strong
+#define NL_GODRAY 8.0 // [toggle] 0.1 subtle ~ 0.8 strong
 
 /* Sky reflection */
 //#define NL_GROUND_REFL 0.4       // [toggle] 0.2 slightly reflective ~ 1.0 fully reflect sky 
-#define NL_GROUND_RAIN_WETNESS 0.6 // 0.0 no wetness ~ 1.0 fully wet blocks when raining
-#define NL_GROUND_RAIN_PUDDLES 0.4 // 0.0 no puddles ~ 1.0 puddles
+#define NL_GROUND_RAIN_WETNESS 1.0 // 0.0 no wetness ~ 1.0 fully wet blocks when raining
+#define NL_GROUND_RAIN_PUDDLES 0.7 // 0.0 no puddles ~ 1.0 puddles
 //#define NL_GROUND_AURORA_REFL    // [toggle] aurora reflection on ground
 
 /* Entity (Actor, ItemInHand) */
