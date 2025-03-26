@@ -82,8 +82,10 @@ void main() {
   // Ajustar la sombra usando smoothstep
   vec2 uvl = v_lightmapUV;
   float shadowmap = smoothstep(0.915, 0.890, uvl.y);
+
+  // CORRECCIÓN: Se usa vec3 en lugar de float3
   diffuse.rgb *= mix(vec3(1.0), vec3(0.3, 0.4, 0.425), shadowmap);
-  
+
   // Agregar un efecto de luz adicional
   diffuse.rgb += diffuse.rgb * (vec3(1.5, 0.5, 0.0) * 1.15) * pow(uvl.x * 1.2, 6.0);
 
