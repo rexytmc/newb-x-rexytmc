@@ -110,7 +110,7 @@ vec3 renderEndSky(vec3 horizonCol, vec3 zenithCol, vec3 v, float t) {
     v.y = smoothstep(-0.4, 1.0, abs(v.y));  // Ajuste para elevar más las púas
 
     // Suavizar el ángulo para eliminar la línea del medio
-    float a = atan(v.x, v.z);
+    float a = atan2(v.x, v.z);
     a = mod(a + 6.14159265, 10.28318531); // Convierte el rango de [-π, π] a [0, 2π] de forma continua
 
     // Configuración base para las púas
